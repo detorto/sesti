@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <!-- Latst compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+<script> jQuery(document).ready(function($) {
+      $(".clickableRow").click(function() {
+            window.document.location = $(this).attr("href");
+      });
+});
+</script>
+
+<script>
+ function nl2br (str, is_xhtml) {
+     var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
+     return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
+  }
+var got_reports = false;
+
+function createServerinfoHTML(server)
+{
+  var c = [];
+  c.push("<tr class=\"clickableRow active\" href=\"/\"><th scope=\"row\">"+"#"+server.id +"</th>");
+    c.push("<td>" + server.name + "</td>");
+    c.push("<td>" + server.address + "</td>");
+    c.push("<td>" + server.comment + "</td>");
+    c.push("<td>" + server.status + "</td></tr>");
+    return c.join("");
+}
+
+function fillReports(reports)
+{
+  var c = []
+  $.each(server.reports, function(i, report) {        
+        c = []
+        c.push('<div class="panel-body">');
+        c.push('<tt>'+report.data+'<tt>');
+        c.push('</div>');
+
+        str = c.join("");
+        str.replace("\t", '&nbsp;&nbsp;&nbsp;&nbsp;');
+        $('#'+report.pos).html(nl2br(str));
+
+      })
+}
+
+function createrReportsTable()
+{
+  var c = [];
+  $.each(server.reports, function(i, report) {             
+  //
+      c.push('<div class="panel panel-default">');
+      c.push('<div class="panel-heading button" data-toggle="collapse" href="#'+report.pos+'">'+report.name+'</div>');
+      c.push('<div class="collapse" id="'+report.pos+'">');
+      c.push('<div class="panel-body">');
+      c.push('<tt>'+report.data+'<tt>');
+      c.push('</div>');
+      c.push('</div>');
+      c.push('</div>');
+
+
+      });
+      if (c.length == 0)
+      {
+        $('#reports').html("<h1>No reports from server!</h1>");
+        got_reports=false;
+      }
+      else
+      {
+        str = c.join("");
+        str.replace("\t", '&nbsp;&nbsp;&nbsp;&nbsp;');
+        $('#reports').html(nl2br(str));
+        got_reports=true;
+      }
+}
+
+function fillTable()
+{
+  $.getJSON('/monitor/api/server/{{servid}}').done( function (response) 
+  {
+    server = response.Server;
+    $('#servdatabody').html(createServerinfoHTML(server));
+      $(".clickableRow").click(function() {
+            window.document.location = $(this).attr("href");
+      });
+
+    if (got_reports)
+    {
+      fillReports(server.reports);
+    }
+    else
+    {
+      createrReportsTable(server.reports);
+    }
+    $('#last_update').html('<li class="active">Last updated: ' + server.last_update+'</li>');
+    var imgs = [];
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/diskstats_iops-day.png">');
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/meminfo_phisical-day.png">');
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/meminfo_virtual-day.png">');
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/if_bond0-day.png">');
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/threads-day.png">');
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/hddtemp_smartctl-day.png">');
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/cpu-day.png">');
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/load-day.png">');
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/users-day.png">');
+    imgs.push('<img src="/munin/'+server.group+'/'+server.muningname+'/memory-day.png">');
+    str = imgs.join("");
+    $('#images').html(str);
+  });
+}
+
+fillTable()
+setInterval(fillTable, 10000);
+</script>
+
+<title></title>
+</head>
+
+<body>
+  <table class="table table-hover">
+  <thead>
+  </thead>
+  <tbody id="servdatabody">
+  </tbody>
+</table>
+<ol class="breadcrumb" id="last_update">
+</ol>
+
+<p>
+
+<div class="panel panel-default">
+  <div class="panel-heading button" data-toggle="collapse" href="#imgs">Images</div>
+  <div class="collapse" id="imgs">
+    <div class="panel-body" id="images">
+    </div>
+  </div>
+</div>
+
+<div id="reports">
+</div>
+
+
+ <ul class="pager">
+    <li class="previous"><a href="/"><span aria-hidden="true">&larr;</span> Back</a><li>
+</ul>
+</body>
+</html>

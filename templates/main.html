@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="static/js/jquery-3.1.0.min.js"></script>
+  
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/css/sidebar.css">
+    <script src="static/js/bootstrap.min.js"></script>
+
+    <script>
+    jQuery(document).ready(function($) {});
+    </script>
+<script>
+</script>
+
+<title>Server Status Informer (SESTI)</title>
+</head>
+
+<body>
+  <div id="wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+
+            <ul class="sidebar-nav">
+            
+                <li class="sidebar-brand">
+                    <a href="#">SESTI</a>
+                </li>
+                 {% for key, value in groups_dict.iteritems() %}
+                <li>
+                    <a href="#{{loop.index0}}">{{key}}</a>
+                </li>
+                
+                {%endfor%}
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+
+<!-- Page Content -->
+  <div id="page-content-wrapper">
+    <div class="container-fluid" >
+      <div class="row">
+	{% if not monitor_runned %}
+ 		<h1> No monitor started!</h1>
+        {% endif %}
+      {% if not groups_dict %}
+        <h2> You have not got any servers yet </h2>
+      {% else %} {% for key, value in groups_dict.iteritems() %}
+          <h2 id="{{loop.index0}}"> {{key}} </h2>
+          <table class="table table-hover table-bordered table-striped" id="{{loop.index0}}">
+          {% for v in value %} 
+                <thead>
+                    {% if servers_dict[v].error %}
+                    <tr class="alert-danger" >
+		    {% else %}
+		    <tr class="alert-info" >
+                    {% endif %}
+
+                      <th>{{servers_dict[v].name}} <span class ="text-muted"> <a href="{{servers_dict[v].address}}"> [{{servers_dict[v].address}}] </a> </span></th>
+                      <th colspan="5">{{servers_dict[v].uptime}}</th>
+                      <th colspan="5">Updated: {{servers_dict[v].report_date}}</th>
+                    </tr>
+                    <tr>
+                      {% for h in servers_dict[v].headers %}
+                      <th>{{h}}</th>
+                      {% endfor %}
+                    </tr>
+                  </thead>    
+                <tbody>
+                      <tr class = "clickableRow" href = "/server/{{servers_dict[v].address}}">
+                        {% for report in servers_dict[v].short_reports %} 
+                        <td class="table-active {{report.cls}}">{{report.text | nl2br}}</td>
+                        {% endfor %}
+                      </tr> 
+                </tbody>
+                <thead>
+                    <tr class="" >
+                      <th colspan="10"></th>
+                    </tr>
+                </thead>
+
+            {% endfor %}
+          </table>
+        
+        {% endfor %}
+      {% endif %}
+      </div>
+    </div>
+  </div>
+  </div>
+  
+  <script type="text/javascript">
+  //$(".clickableRow").click(function() {
+    //        window.document.location = $(this).attr("href");
+      //});
+  </script>
+</body>
+</html>
